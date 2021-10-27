@@ -40,3 +40,14 @@ By Nov 15 (5:00 PM) ⏰ 💣, students are supposed to submit the following pack
 4. organization and clarity of submitted materials. 
 
 All criteria carry out the equal weight in terms of marking.
+
+
+## **Structure of the project**
+1. Documents:
+    - docs: for some detail information about the code and implementation
+    - utils: for some usually used functions or methods
+    - data: save the dataset in this file
+2. Files:
+    - analyze: for analyzing the data to the cleaned data
+    - clean: for cleaning the data in the data
+   
