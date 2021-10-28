@@ -7,17 +7,24 @@ from web3 import Web3
 from tqdm import tqdm, tqdm_pandas
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
-tqdm_pandas(tqdm())
+tqdm.pandas(desc="My progress_apply")
 
 
 class PreprocessData:
-    def __init__(self):
+    def __init__(self, start_row: int, end_row: int):
+        """
+        Specify the start_row and end_row
+        :param start_row:
+        :param end_row:
+        """
         with open("config.json", "r") as f:
             conf = json.load(f)
         self.file_id = conf["raw_data_file_id"]
         self.web3_provider = conf["web3_provider"]
         self.download_data()  # if the file doesn't exist'
-        self.dfm = pd.read_csv("./data/raw_data.csv")
+        self.start_row = start_row
+        self.end_row = end_row
+        self.dfm = pd.read_csv("./data/raw_data.csv").iloc[start_row:end_row, :]
         self.w3_list = [Web3(Web3.HTTPProvider(x)) for x in self.web3_provider]
         self.w3_list_length = len(self.w3_list)
         self.nounce = 0  # for using w3_sever
@@ -25,7 +32,7 @@ class PreprocessData:
     def clean_and_save_data(self):
         self.add_address_type()
         self.divide_value_by_1e18()
-        self.dfm.to_csv("./data/cleaned.csv")
+        self.dfm.to_csv(f"./data/cleaned_data{self.start_row}_{self.end_row}.csv")
 
     def download_data(self):
         if not os.path.exists("./data/raw_data.csv"):
@@ -55,12 +62,15 @@ class PreprocessData:
         """
         # Because the time of calling api is limited, so we created a api_token list to avoid the limitation
         index = self.nounce % self.w3_list_length
-        res = self.w3_list[index].eth.get_code(self.w3.toChecksumAddress(address)).hex()
+        res = self.w3_list[index].eth.get_code(self.w3_list[index].toChecksumAddress(address)).hex()
         self.nounce += 1
         if res == "0x":
             return "EOA"
         else:
             return "Contract"
+
+    def _get_address_type(self) -> dict:
+        all_address = self.dfm["from_address"].append(self.dfm["to_address"]).unique()
 
     def add_address_type(self) -> None:  # FIXME add infura
         """
@@ -73,6 +83,5 @@ class PreprocessData:
 
 
 if __name__ == '__main__':
-    preprocess_data = PreprocessData()
-    # print(preprocess_data._judge_address_type("0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be"))
+    preprocess_data = PreprocessData(1, 100)
     preprocess_data.clean_and_save_data()
