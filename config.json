@@ -1,4 +1,14 @@
 {
-  "raw_data_file_id": "1XUzB4Ilp6SwwPzU3H7VqSMfKH1ofzVGA",
-  "web3_provider": ["https://mainnet.infura.io/v3/e1b15c78bd534c47980900784c25fbe2"]
+  "raw_data_file_id": "1r7IYeYBYvSS6uX4N-x_hLOAqZQqAPu5_",
+  "web3_provider": [
+    "https://mainnet.infura.io/v3/e1b15c78bd534c47980900784c25fbe2",
+    "https://mainnet.infura.io/v3/bd72ec702e1d4b2689eb63012a860eb8",
+    "https://mainnet.infura.io/v3/8c79d20f15e04288ade9b34f595e13e4",
+    "https://mainnet.infura.io/v3/a6cf4b1705e9430aa9bf1699dad25dc1",
+    "https://mainnet.infura.io/v3/ecfbe8cf64eb4df391e0fc17e6fe15e6",
+    "https://mainnet.infura.io/v3/800ff156fefb4424b2c7ba09e03a7ab0",
+    "https://mainnet.infura.io/v3/c69dc12364b34877806ae76b87c27fce",
+    "https://mainnet.infura.io/v3/ad612c8d545c4cc1a3d72812769fa1f5",
+    "https://mainnet.infura.io/v3/6a48654961d14572921bdc5be83c23a9"
+  ]
 }
