@@ -140,4 +140,5 @@ cython_debug/
 
 # dataset
 data/raw_data.csv
+data/all_address_*
 

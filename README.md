@@ -51,3 +51,8 @@ All criteria carry out the equal weight in terms of marking.
     - analyze: for analyzing the data to the cleaned data
     - clean: for cleaning the data in the data
    
+## **How to start**
+1. Install the relative packages:
+   ``` 
+   pip install -r requirements.txt
+   ```
