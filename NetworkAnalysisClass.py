@@ -35,10 +35,26 @@ class NetworkAnalysis:
 
     def cal_degree_of_nodes(self, network: nx.graph.Graph) -> dict:
         self.network = network
+
+        g = network
         
-        G = network
-        nodeDegree = G.degree
-        return nodeDegree
+        degreeNode = dict(g.degree())
+        return degreeNode
+
+    
+
+     def cal_weight_of_nodes(self, network: nx.graph.Graph) -> dict:
+        """
+        Input the network class and output the weight between each nodes.
+            {"from_address_1":
+                [{"to_address_1":12},"to_address_2":13}],
+             "from_address_2":
+                [{"to_address_1":12},"to_address_2":13}],
+            }
+        :param network:
+        :return: the weight between each nodes
+        """
+        pass
 
 
     def draw_degree_distribution(self, network: nx.graph) -> None:
@@ -50,26 +66,55 @@ class NetworkAnalysis:
 
         self #to be filled later)
 
+
+        # This is for the histogram 
+        # note that the variable DegreeNode is the variable generated from cal_degree_of_nodes
+
         # Obtaining the degree sequence
-        k = sorted([d for n, d in cal_degree_of_nodes(self)], reverse=True)
+        k = sorted([d for n, d in degreeNode], reverse=True)
         # Count of nodes with degree 'k = k_i'
         p_k = np.unique(k, return_counts=True)
 
-        # Creating the figure
+        #%% degree distribution plot (Log Scale)
+
+        # create figure
         fig = plt.figure(figsize=(9, 6))
 
-        # Creating the plot
+        # create plot
         ax = fig.add_subplot(1, 1, 1)
 
-        # Plotting the graph
+        # plot data
         plt.bar(p_k[0], p_k[1], width=0.9, color="b")
 
-        # Labelling the graph
+        # transform the scale of axes
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+
+        # aesthetics
         plt.title("Degree Histogram")
         plt.ylabel("Count")
         plt.xlabel("Degree")
 
+        plt.show()  
+
+
+
+        # cumulative plot
+        # note that degreeNodes is the dict generated from cal_degree_of_nodes
+
+        k = list(degreeNodes.values())
+
+        ds = collections.Counter(k)
+        fig = plt.figure(figsize=(6, 4))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.scatter(ds.keys(), ds.values(), color='k')
+        ax.set_yscale('log')
+        ax.set_xscale('log')
+        ax.set_xlabel('Degree')
+        ax.set_ylabel('Counts of nodes')
         plt.show()
+
 
         pass
 
