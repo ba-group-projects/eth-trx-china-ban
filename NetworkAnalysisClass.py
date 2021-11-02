@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # %%
 
-my_data = ("cleaned_data.csv")
+my_data = ("dataCleaned/cleaned_data.csv")
 
 df = pd.read_csv(my_data, header=0)
 
@@ -34,16 +34,15 @@ class NetworkAnalysis:
 
 
     def cal_degree_of_nodes(self, network: nx.graph.Graph) -> dict:
-        self.network = network
-
+        
         g = network
         
-        degreeNode = dict(g.degree())
-        return degreeNode
+        self.degreeNode = g.degree()
+        return self.degreeNode
 
     
 
-     def cal_weight_of_nodes(self, network: nx.graph.Graph) -> dict:
+    def cal_weight_of_nodes(self, network: nx.graph.Graph) -> dict:
         """
         Input the network class and output the weight between each nodes.
             {"from_address_1":
@@ -64,7 +63,7 @@ class NetworkAnalysis:
         :return: None
         """
 
-        self #to be filled later)
+       
 
 
         # This is for the histogram 
@@ -103,27 +102,28 @@ class NetworkAnalysis:
         # cumulative plot
         # note that degreeNodes is the dict generated from cal_degree_of_nodes
 
-        k = list(degreeNodes.values())
+        # k = list(self.degreeNodes.values())
 
-        ds = collections.Counter(k)
-        fig = plt.figure(figsize=(6, 4))
-        ax = fig.add_subplot(1, 1, 1)
-        ax.scatter(ds.keys(), ds.values(), color='k')
-        ax.set_yscale('log')
-        ax.set_xscale('log')
-        ax.set_xlabel('Degree')
-        ax.set_ylabel('Counts of nodes')
-        plt.show()
+        # ds = collections.Counter(k)
+        # fig = plt.figure(figsize=(6, 4))
+        # ax = fig.add_subplot(1, 1, 1)
+        # ax.scatter(ds.keys(), ds.values(), color='k')
+        # ax.set_yscale('log')
+        # ax.set_xscale('log')
+        # ax.set_xlabel('Degree')
+        # ax.set_ylabel('Counts of nodes')
+        # plt.show()
 
 
-        pass
+        
 
 # %%
 if __name__ == '__main__':
     
     clean_data = NetworkAnalysis(df)
     G = clean_data.gen_network()
-    dict = G.cal_degree_of_nodes()
+    dict = clean_data.cal_degree_of_nodes(G)
+    clean_data.draw_degree_distribution(G)
 
 
     # nx.draw(G)      #to test and see if it works, which it does!
