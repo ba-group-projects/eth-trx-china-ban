@@ -13,7 +13,17 @@ class NetworkAnalysis:
         :return:
             nx.graph.Graph
         """
-        pass
+        G = nx.from_pandas_edgelist(self.data,                # the df containing the data
+                            source='from_address',        # first element of the dyad
+                            target='to_address',        # second element of the dyad
+                            edge_attr='value')
+        return G
+
+    def plot_network(self, network: nx.graph.Graph):
+        plt.figure(figsize=(20, 20))
+        pos=nx.spring_layout(network, k=0.15)
+        nx.draw_networkx(network,pos,arrows=True,node_size=25, node_color='blue', with_labels=False)
+        plt.show()
 
     def cal_degree_of_nodes(self, network: nx.graph.Graph) -> dict:
         """
