@@ -20,9 +20,9 @@ class NetworkAnalysis:
         return G
 
     def plot_network(self, network: nx.graph.Graph):
-        plt.figure(figsize=(20, 20))
+        plt.figure(figsize=(50,50))
         pos=nx.spring_layout(network, k=0.15)
-        nx.draw_networkx(network,pos,arrows=True,node_size=25, node_color='blue', with_labels=False)
+        nx.draw_networkx(network,pos,arrows=True,node_size=50, node_color='blue', with_labels=False)
         plt.show()
 
     def cal_degree_of_nodes(self, network: nx.graph.Graph) -> dict:
