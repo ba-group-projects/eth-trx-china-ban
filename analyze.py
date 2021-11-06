@@ -1,5 +1,7 @@
 import networkx as nx
 import pandas as pd
+from collections import Counter
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -16,13 +18,13 @@ class NetworkAnalysis:
         pass
 
     def cal_degree_of_nodes(self, network: nx.graph.Graph) -> dict:
-        """
-        Input the network class and output the degree of each nodes.
-            eg. {"0x6c96ff26ee153996616b3ab8e6a21c3a8da061f1":12,"0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2":31,....}
-        :param network:
-        :return: the weight between each nodes
-        """
-        pass
+        
+        # self.network = network
+        # self.degreeNode = degreeNode      # ask Benedict
+
+        degreeNode = dict(network.degree())
+        return degreeNode
+
 
     def cal_weight_of_nodes(self, network: nx.graph.Graph) -> dict:
         """
@@ -38,12 +40,49 @@ class NetworkAnalysis:
         pass
 
     def draw_degree_distribution(self, network: nx.graph) -> None:
-        """
-        According the degree of nodes we get from cal_degree_of_nodes, draw the distribution with plt
-        :param network: nx.graph
-        :return: None
-        """
-        pass
+        
+        ## Creating parameters for degre distribution
+        n = len(network.nodes)
+
+        # get nodal degree 'k' data as list
+        k_g = sorted([d for n, d in network.degree()], reverse=True)  #add degreeNode here
+
+        # get 'p_k'
+        p_k = np.unique(k_g, return_counts=True)
+   
+        ## Creating parameters for poisson distribution
+        # Creating parameters for poisson (lam = average degree of graph)
+        average = sum(k_g)/n
+        poisson_dist = np.random.poisson(lam=average, size=len(network.nodes()))
+        k_poisson = Counter(poisson_dist)
+        n_poisson = len(poisson_dist)
+
+        x_poisson = list(k_poisson.keys())
+        x_poisson = pd.DataFrame(x_poisson)
+        y_poisson = list(k_poisson.values())
+        y_poisson = pd.DataFrame(y_poisson)
+
+
+        ## Create figure
+        fig = plt.figure(figsize=(20, 12))
+
+        # Add plot 1 (degree distribution)
+        ax1 = fig.add_subplot(1, 1, 1)
+        ax1.scatter(x_poisson, y_poisson/n_poisson, color='red')
+        ax1.set_ylabel("count")
+        ax1.set_xlabel("($k$)")
+
+        # Add plot 2 (Poisson distribution)
+        ax2 = fig.add_subplot(1, 1, 1)
+        ax2.scatter(p_k[0], p_k[1]/n, marker='o', color='black', alpha=0.7)
+        ax2.set_ylabel("$Pr(k = k_{i})$")
+        ax2.set_xlabel("Degree $k$")
+        ax2.set_yscale('log')
+        ax2.set_xscale('log')
+
+        ax2.set_title("Degree Distribution")
+
+        plt.show()
 
     def cal_betweenness_centrality(self, network: nx.graph) -> dict:
         """
