@@ -22,8 +22,8 @@ class NetworkAnalysis:
         # self.network = network
         # self.degreeNode = degreeNode      # ask Benedict
 
-        degreeNode = dict(network.degree())
-        return degreeNode
+        self.degreeNode = dict(network.degree())
+        return self.degreeNode
 
 
     def cal_weight_of_nodes(self, network: nx.graph.Graph) -> dict:
@@ -45,7 +45,7 @@ class NetworkAnalysis:
         n = len(network.nodes)
 
         # get nodal degree 'k' data as list
-        k_g = sorted([d for n, d in network.degree()], reverse=True)  #add degreeNode here
+        k_g = sorted([d for n, d in self.degreeNode], reverse=True)  #add degreeNode here
 
         # get 'p_k'
         p_k = np.unique(k_g, return_counts=True)
