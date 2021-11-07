@@ -21,7 +21,7 @@ class NetworkAnalysis:
 
     def plot_network(self, network: nx.graph.Graph):
         plt.figure(figsize=(50,50))
-        pos=nx.spring_layout(network, k=0.15)
+        pos=nx.spring_layout(network)#, k=0.15
         nx.draw_networkx(network,pos,arrows=True,node_size=50, node_color='blue', with_labels=False)
         plt.show()
 
