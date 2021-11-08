@@ -4,6 +4,7 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 import powerlaw
+from networkx.algorithms import bipartite as bp
 
 
 class NetworkAnalysis:
