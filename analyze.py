@@ -1,7 +1,5 @@
 import networkx as nx
 import pandas as pd
-from collections import Counter
-import numpy as np
 import matplotlib.pyplot as plt
 <<<<<<< Updated upstream
 import powerlaw
@@ -117,10 +115,20 @@ class NetworkAnalysis:
                     node_color=contract_color,alpha=alpha,node_shape=contract_node_shape,node_size=node_size)
 
     def cal_degree_of_nodes(self, network: nx.graph.Graph) -> dict:
+<<<<<<< HEAD
         
         self.degreeNode = network.degree()
         return dict(self.degreeNode)
 
+=======
+        """
+        Input the network class and output the degree of each nodes.
+            eg. {"0x6c96ff26ee153996616b3ab8e6a21c3a8da061f1":12,"0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2":31,....}
+        :param network:
+        :return: the weight between each nodes
+        """
+        pass
+>>>>>>> parent of a07d487 (Merge branch 'main' into mattheus/plot-network-function)
 
     def cal_weight_of_nodes(self, network: nx.graph.Graph) -> dict:
         """
@@ -141,6 +149,7 @@ class NetworkAnalysis:
 
     def draw_degree_distribution(self, network: nx.graph) -> None:
         """
+<<<<<<< HEAD
         
         function returns the following: 
         1) Degree Distribution (Power Law vs Poisson)
@@ -232,6 +241,13 @@ class NetworkAnalysis:
         plt.xlabel("rank")
 
         plt.show()
+=======
+        According the degree of nodes we get from cal_degree_of_nodes, draw the distribution with plt
+        :param network: nx.graph
+        :return: None
+        """
+        pass
+>>>>>>> parent of a07d487 (Merge branch 'main' into mattheus/plot-network-function)
 
 
         ### 4 Degree Distribution with Power Law Function
