@@ -10,13 +10,107 @@ class NetworkAnalysis:
     def __init__(self, data: pd.DataFrame):
         self.data = data
 
-    def gen_network(self) -> nx.graph.Graph:
+    def gen_network(self, network_type) -> nx.graph.Graph:
         """
         transform the pandas.DataFrame into nx.graph.Graph objects
         :return:
             nx.graph.Graph
         """
-        pass
+        df = self.data
+        userSpace = df[(df.from_address_type == 'EOA') & (df.to_address_type == 'EOA')]
+        userSpace = userSpace[['from_address','to_address','value']]
+        bipartiteSpace = df[((df.from_address_type == 'EOA') & (df.to_address_type == 'Contract')) | ((df.from_address_type == 'Contract') & (df.to_address_type == 'EOA'))]
+        bipartiteSpace = bipartiteSpace[['from_address','to_address','value']]
+
+        if network_type == 'monopartite_full':
+            final_network = nx.from_pandas_edgelist(userSpace,source='from_address',target='to_address',edge_attr='value')
+
+        elif network_type == 'monopartite_gcc':
+            base_network = nx.from_pandas_edgelist(userSpace,source='from_address',target='to_address',edge_attr='value')
+            
+            gcc = list(max(nx.connected_components(base_network), key=lambda x: len(x)))
+            gcc_df = userSpace[userSpace['from_address'].isin(gcc) | userSpace['to_address'].isin(gcc)]
+
+            final_network = nx.from_pandas_edgelist(gcc_df,source='from_address',target='to_address',edge_attr='value')
+
+        elif network_type == 'bipartite_full':
+            final_network = nx.Graph()
+            final_network.add_nodes_from(np.unique(np.array(bipartiteSpace['from_address'])), bipartite=0)
+            final_network.add_nodes_from(np.unique(np.array(bipartiteSpace['to_address'])), bipartite=1)
+            final_network.add_edges_from(list(zip(bipartiteSpace['from_address'], bipartiteSpace['to_address'])))
+
+        elif network_type == 'bipartite_gcc':
+            base_network = nx.Graph()
+            base_network.add_nodes_from(np.unique(np.array(bipartiteSpace['from_address'])), bipartite=0)
+            base_network.add_nodes_from(np.unique(np.array(bipartiteSpace['to_address'])), bipartite=1)
+            base_network.add_edges_from(list(zip(bipartiteSpace['from_address'], bipartiteSpace['to_address'])))
+
+            gcc = list(max(nx.connected_components(base_network), key=lambda x: len(x)))
+            gcc_df = bipartiteSpace[bipartiteSpace['from_address'].isin(gcc) | bipartiteSpace['to_address'].isin(gcc)]
+            gcc_users = np.unique(np.array(gcc_df['from_address']))
+            gcc_contracts = np.unique(np.array(gcc_df['to_address']))
+            gcc_edges = list(zip(gcc_df['from_address'], gcc_df['to_address']))
+
+            final_network = nx.Graph()
+            final_network.add_nodes_from(gcc_users, bipartite=0)
+            final_network.add_nodes_from(gcc_contracts, bipartite=1)
+            final_network.add_edges_from(gcc_edges)
+
+        return final_network
+
+    def plot_network(self, network: nx.graph.Graph, network_type):
+        seed = 100; user_color = 'blue'; contract_color = 'red'
+        node_size = 200; contract_node_shape = 's'; alpha = 0.5
+
+        if network_type == 'monopartite_full':
+            print(f'{network_type} network is connected: {nx.is_connected(network)}')
+            
+            pos=nx.spring_layout(network, seed = seed)
+            nx.draw(network,pos,arrows=True,node_size=node_size,
+                                node_color=user_color, alpha=alpha)
+
+        elif network_type == 'monopartite_gcc':
+            print(f'{network_type} network is connected: {nx.is_connected(network)}')
+
+            pos=nx.spring_layout(network, seed = seed)
+            nx.draw(network,pos,arrows=True,node_size=node_size,
+                                node_color=user_color, alpha=alpha)     
+
+        elif network_type == 'bipartite_full':
+            print(f'{network_type} network is connected: {nx.is_connected(network)}')
+            print(f'{network_type} network is bipartite: {nx.is_bipartite(network)}')
+            
+            users=[]; contracts=[]
+            for node in network.nodes(data=True):
+                address = node[0]
+                attribute = node[1]['bipartite']
+                if attribute == 0:
+                    users.append(address)
+                else:
+                    contracts.append(address)
+
+            pos = nx.spring_layout(network, seed = seed)     
+            # draw the network - user nodes
+            nx.draw(network,pos,arrows=True,nodelist=list(users),
+                                node_color=user_color,alpha=alpha,node_size=node_size)
+            # draw the network - contract nodes
+            nx.draw(network,pos,arrows=True,nodelist=list(contracts),
+                                node_color=contract_color,alpha=alpha,node_shape=contract_node_shape,node_size=node_size)
+
+        elif network_type == 'bipartite_gcc':
+            print(f'{network_type} network is connected: {nx.is_connected(network)}')
+            print(f'{network_type} network is bipartite: {nx.is_bipartite(network)}')
+            
+            gcc_users = bp.sets(network)[0]
+            gcc_contracts = bp.sets(network)[1]
+            
+            pos = nx.spring_layout(network, seed = seed)
+            # draw the network - user nodes
+            nx.draw(network,pos,arrows=True,nodelist=list(gcc_users),
+                    node_color=user_color,alpha=alpha,node_size=node_size)
+            # draw the network - contract nodes
+            nx.draw(network,pos,arrows=True,nodelist=list(gcc_contracts),
+                    node_color=contract_color,alpha=alpha,node_shape=contract_node_shape,node_size=node_size)
 
     def cal_degree_of_nodes(self, network: nx.graph.Graph) -> dict:
         
@@ -262,3 +356,39 @@ class NetworkAnalysis:
         :return:
         """
         pass
+
+if __name__ == '__main__':
+    path = os.getcwd()
+    df = pd.read_csv(path+'\data\cleaned_data.csv')
+    # df = pd.read_csv(path+'\\data\\data_example.csv')
+    df = df.drop(df.columns[0],axis=1)
+
+    network_analysis_obj = NetworkAnalysis(df)
+    monopartite_full = network_analysis_obj.gen_network(network_type='monopartite_full')
+    monopartite_gcc = network_analysis_obj.gen_network(network_type='monopartite_gcc')
+
+    fig = plt.figure(figsize=(50, 25), constrained_layout=True)
+    ax1 = fig.add_subplot(121)
+    network_analysis_obj.plot_network(monopartite_full, network_type='monopartite_full')
+    ax1.set_title('Monopartite Full', fontdict={'fontsize': 75})
+
+    ax2 = fig.add_subplot(122)
+    network_analysis_obj.plot_network(monopartite_gcc, network_type='monopartite_gcc')
+    ax2.set_title('Monopartite GCC', fontdict={'fontsize': 75})
+
+    plt.show()
+
+    network_analysis_obj = NetworkAnalysis(df)
+    bipartite_full = network_analysis_obj.gen_network(network_type='bipartite_full')
+    bipartite_gcc = network_analysis_obj.gen_network(network_type='bipartite_gcc')
+
+    fig = plt.figure(figsize=(50, 25), constrained_layout=True)
+    ax1 = fig.add_subplot(121)
+    network_analysis_obj.plot_network(bipartite_full, network_type='bipartite_full')
+    ax1.set_title('Bipartite Full', fontdict={'fontsize': 75})
+
+    ax2 = fig.add_subplot(122)
+    network_analysis_obj.plot_network(bipartite_gcc, network_type='bipartite_gcc')
+    ax2.set_title('Bipartite GCC', fontdict={'fontsize': 75})
+
+    plt.show()
