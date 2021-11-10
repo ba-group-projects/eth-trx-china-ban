@@ -30,8 +30,8 @@ class PreprocessData:  # TODO Split this class into separate classes to decouple
         self.w3_list_length = len(self.w3_list)
         self.nounce = 0  # for using w3_sever
 
-    def select_data_by_time(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 3, 30, 0, 0, pytz.UTC),
-                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 15, 30, 0, 0, pytz.UTC)):
+    def select_data_by_time(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 1, 0, 0, 0, pytz.UTC),
+                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 13, 0, 0, 0, pytz.UTC)):
         self.dfm["block_timestamp"] = pd.to_datetime(self.dfm["block_timestamp"])
         self.dfm = self.dfm[(start_time <= self.dfm["block_timestamp"]) & (self.dfm["block_timestamp"] <= end_time)]
 
@@ -58,8 +58,8 @@ class PreprocessData:  # TODO Split this class into separate classes to decouple
         self.dfm = pd.concat([eoa_and_eoa_dfm, eoa_and_contract_dfm])
         self.dfm.sort_values("block_timestamp",inplace=True)
 
-    def clean_and_save_data(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 3, 30, 0, 0, pytz.UTC),
-                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 15, 30, 0, 0, pytz.UTC)):
+    def clean_and_save_data(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 3, 0, 0, 0, pytz.UTC),
+                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 15, 0, 0, 0, pytz.UTC),filename :str = "./data/cleaned_data.csv"):
         print("Start to add address type")
         self.add_address_type()
         print("Start to divide value by 1e18")
@@ -69,7 +69,7 @@ class PreprocessData:  # TODO Split this class into separate classes to decouple
         print("Start to select data by top active nodes")
         self.select_data_by_nodes_number()
         print("Start to save data")
-        self.dfm.to_csv(f"./data/cleaned_data.csv", index=False)
+        self.dfm.to_csv(filename, index=False)
 
     def download_data(self):
         if not os.path.exists("./data/raw_data.csv"):
@@ -186,4 +186,9 @@ if __name__ == "__main__":
     # for i in range(5):
     #     names[f"p{i + 1}"].join()
     mp = PreprocessData()
-    mp.clean_and_save_data()
+    mp. clean_and_save_data(start_time = datetime.datetime(2021, 9, 24, 3, 0, 0, 0, pytz.UTC),
+                            end_time= datetime.datetime(2021, 9, 24, 9, 0, 0, 0, pytz.UTC),filename = "./data/cleaned_data_before_ban.csv")
+    mp = PreprocessData()
+    mp. clean_and_save_data(start_time = datetime.datetime(2021, 9, 24, 9, 0, 0, 0, pytz.UTC),
+                        end_time= datetime.datetime(2021, 9, 24, 15, 0, 0, 0, pytz.UTC),filename = "./data/cleaned_data_after_ban.csv")
+                                            
