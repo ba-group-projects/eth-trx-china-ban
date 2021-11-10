@@ -101,8 +101,17 @@ class NetworkAnalysis:
             print(f'{network_type} network is connected: {nx.is_connected(network)}')
             print(f'{network_type} network is bipartite: {nx.is_bipartite(network)}')
             
-            gcc_users = bp.sets(network)[0]
-            gcc_contracts = bp.sets(network)[1]
+            # gcc_users = bp.sets(network)[0]
+            # gcc_contracts = bp.sets(network)[1]
+
+            gcc_users=[]; gcc_contracts=[]
+            for node in network.nodes(data=True):
+                address = node[0]
+                attribute = node[1]['bipartite']
+                if attribute == 0:
+                    gcc_users.append(address)
+                else:
+                    gcc_contracts.append(address)
             
             pos = nx.spring_layout(network, seed = seed)
             # draw the network - user nodes
