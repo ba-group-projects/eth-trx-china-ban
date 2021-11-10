@@ -30,8 +30,8 @@ class PreprocessData:  # TODO Split this class into separate classes to decouple
         self.w3_list_length = len(self.w3_list)
         self.nounce = 0  # for using w3_sever
 
-    def select_data_by_time(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 3, 30, 0, 0, pytz.UTC),
-                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 15, 30, 0, 0, pytz.UTC)):
+    def select_data_by_time(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 1, 0, 0, 0, pytz.UTC),
+                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 13, 0, 0, 0, pytz.UTC)):
         self.dfm["block_timestamp"] = pd.to_datetime(self.dfm["block_timestamp"])
         self.dfm = self.dfm[(start_time <= self.dfm["block_timestamp"]) & (self.dfm["block_timestamp"] <= end_time)]
 
@@ -58,8 +58,8 @@ class PreprocessData:  # TODO Split this class into separate classes to decouple
         self.dfm = pd.concat([eoa_and_eoa_dfm, eoa_and_contract_dfm])
         self.dfm.sort_values("block_timestamp",inplace=True)
 
-    def clean_and_save_data(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 3, 30, 0, 0, pytz.UTC),
-                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 15, 30, 0, 0, pytz.UTC)):
+    def clean_and_save_data(self, start_time: datetime.datetime = datetime.datetime(2021, 9, 24, 3, 0, 0, 0, pytz.UTC),
+                            end_time: datetime.datetime = datetime.datetime(2021, 9, 24, 15, 0, 0, 0, pytz.UTC)):
         print("Start to add address type")
         self.add_address_type()
         print("Start to divide value by 1e18")
