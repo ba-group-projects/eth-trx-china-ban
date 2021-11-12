@@ -23,7 +23,7 @@ class NetworkAnalysis:
         bipartiteSpace = bipartiteSpace[['from_address','to_address','value']]
 
         if network_type == 'monopartite_full':
-            final_network = nx.from_pandas_edgelist(userSpace,source='from_address',target='to_address',edge_attr='value',create_using=nx.DiGraph())
+            final_network = nx.from_pandas_edgelist(userSpace,source='from_address',target='to_address',edge_attr='value')
 
         elif network_type == 'monopartite_gcc':
             base_network = nx.from_pandas_edgelist(userSpace,source='from_address',target='to_address',edge_attr='value')
@@ -31,10 +31,10 @@ class NetworkAnalysis:
             gcc = list(max(nx.connected_components(base_network), key=lambda x: len(x)))
             gcc_df = userSpace[userSpace['from_address'].isin(gcc) | userSpace['to_address'].isin(gcc)]
 
-            final_network = nx.from_pandas_edgelist(gcc_df,source='from_address',target='to_address',edge_attr='value',create_using=nx.DiGraph())
+            final_network = nx.from_pandas_edgelist(gcc_df,source='from_address',target='to_address',edge_attr='value')
 
         elif network_type == 'bipartite_full':
-            final_network = nx.DiGraph()
+            final_network = nx.Graph()
             final_network.add_nodes_from(np.unique(np.array(bipartiteSpace['from_address'])), bipartite=0)
             final_network.add_nodes_from(np.unique(np.array(bipartiteSpace['to_address'])), bipartite=1)
             final_network.add_edges_from(list(zip(bipartiteSpace['from_address'], bipartiteSpace['to_address'])))
@@ -51,7 +51,7 @@ class NetworkAnalysis:
             gcc_contracts = np.unique(np.array(gcc_df['to_address']))
             gcc_edges = list(zip(gcc_df['from_address'], gcc_df['to_address']))
 
-            final_network = nx.DiGraph()
+            final_network = nx.Graph()
             final_network.add_nodes_from(gcc_users, bipartite=0)
             final_network.add_nodes_from(gcc_contracts, bipartite=1)
             final_network.add_edges_from(gcc_edges)
@@ -89,7 +89,7 @@ class NetworkAnalysis:
                 else:
                     contracts.append(address)
 
-            pos = nx.spring_layout(network, seed = seed)     
+            pos = nx.spring_layout(network, seed = seed)   
             # draw the network - user nodes
             nx.draw(network,pos,arrows=True,nodelist=list(users),
                                 node_color=user_color,alpha=alpha,node_size=node_size)
