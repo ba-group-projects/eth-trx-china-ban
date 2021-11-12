@@ -35,7 +35,7 @@ class PreprocessData:  # TODO Split this class into separate classes to decouple
         self.dfm["block_timestamp"] = pd.to_datetime(self.dfm["block_timestamp"])
         self.dfm = self.dfm[(start_time <= self.dfm["block_timestamp"]) & (self.dfm["block_timestamp"] <= end_time)]
 
-    def select_data_by_nodes_number(self, num: int = 10000):
+    def select_data_by_nodes_number(self, num: int = 5000):
         """
         Select data according to the top num nodes according to value
         :param num: num
