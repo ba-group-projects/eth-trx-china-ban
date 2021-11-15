@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from prettytable import PrettyTable
 from operator import itemgetter
+import seaborn as sns
 
 class NetworkAnalysis:
     def __init__(self, data: pd.DataFrame):
@@ -552,6 +553,20 @@ class NetworkAnalysis:
         centrality_table_2.add_row(['Std',round(np.std(dc_1),5), round(np.std(dc_2),5), 
                             round(np.std(cc_1),5), round(np.std(cc_2),5)])
         print(centrality_table_2)                            
+
+    def plot_centrality(network: nx.graph.Graph):
+        bet_centrality = nx.betweenness_centrality(network)
+        ev_centrality = nx.eigenvector_centrality(network, max_iter=200)
+        deg_centrality = nx.degree_centrality(network)
+        close_centrality = nx.closeness_centrality(network)
+        cen_df = pd.DataFrame({'degree': deg_centrality, 'ev_centrality': ev_centrality,
+                        'betweenness_centrality': bet_centrality, 'close_centrality': close_centrality}
+                        )
+        # --+ correlation matrix
+        cen_df.corr()
+        # --+ scatter plot matrix
+        sns.pairplot(cen_df)
+        plt.savefig('./figure/centrality_plot.png')    
 
     def plot_modularity_scores(modularity_scores, figsize):
         fig = plt.figure(figsize=figsize)
