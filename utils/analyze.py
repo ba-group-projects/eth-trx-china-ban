@@ -77,35 +77,203 @@ class NetworkAnalysis:
                                    node_size=node_size, alpha=alpha)
             nx.draw_networkx_edges(network, pos=bi_pos, width=edge_width, alpha=alpha, arrows=True, arrowsize=arrowsize)
 
-    def plot_network_comparison(obj_list, network_list, figsize=(50,50), title_fontsize=75):
-        fig = plt.figure(figsize=figsize, constrained_layout=True)
-        ax1 = fig.add_subplot(221)
-        ax1.set_axis_off()
-        ax1_1 = fig.add_subplot(221)
-        ax1_1.set_title('Monopartite Before Ban', fontdict={'fontsize': title_fontsize})
-        obj_list[0].plot_network(network_list[0], network_type='monopartite')
+    def plot_network_comparison(obj_list, network_list, network_type, figsize=(50,25), title_fontsize=75):
+        
+        if network_type == 'monopartite':
+            fig = plt.figure(figsize=figsize, constrained_layout=True)
+            ax1 = fig.add_subplot(121)
+            ax1.set_axis_off()
+            ax1_1 = fig.add_subplot(121)
+            ax1_1.set_title('Monopartite Before Ban', fontdict={'fontsize': title_fontsize})
+            obj_list[0].plot_network(network_list[0], network_type='monopartite')
 
-        ax2 = fig.add_subplot(222)
-        ax2.set_axis_off()
-        ax2_1 = fig.add_subplot(222)
-        ax2_1.set_title('Monopartite After Ban', fontdict={'fontsize': title_fontsize})
-        obj_list[1].plot_network(network_list[1], network_type='monopartite')
+            ax2 = fig.add_subplot(122)
+            ax2.set_axis_off()
+            ax2_1 = fig.add_subplot(122)
+            ax2_1.set_title('Monopartite After Ban', fontdict={'fontsize': title_fontsize})
+            obj_list[1].plot_network(network_list[1], network_type='monopartite')
 
-        ax3 = fig.add_subplot(223)
-        ax3.set_axis_off()
-        ax3_1 = fig.add_subplot(223)
-        ax3_1.set_title('Bipartite Before Ban', fontdict={'fontsize': title_fontsize})
-        print(f'Network before ban is bipartite: {nx.is_bipartite(network_list[2])}')
-        obj_list[0].plot_network(network_list[2], network_type='bipartite')
+            fig.savefig('./figure/monopartite_full_network_comparison.jpg')
+            plt.show()
+        
+        elif network_type == 'bipartite':
+            fig = plt.figure(figsize=figsize, constrained_layout=True)
+            ax1 = fig.add_subplot(121)
+            ax1.set_axis_off()
+            ax1_1 = fig.add_subplot(121)
+            ax1_1.set_title('Bipartite Before Ban', fontdict={'fontsize': title_fontsize})
+            print(f'Network before ban is bipartite: {nx.is_bipartite(network_list[0])}')
+            obj_list[0].plot_network(network_list[0], network_type='bipartite')
 
-        ax4 = fig.add_subplot(224)
-        ax4.set_axis_off()
-        ax4_1 = fig.add_subplot(224)
-        ax4_1.set_title('Bipartite After Ban', fontdict={'fontsize': title_fontsize})
-        print(f'Network after ban is bipartite: {nx.is_bipartite(network_list[3])}')
-        obj_list[1].plot_network(network_list[3], network_type='bipartite')
-        plt.show()
-        fig.savefig('./figure/network_comparison.jpg')
+            ax2 = fig.add_subplot(122)
+            ax2.set_axis_off()
+            ax2_1 = fig.add_subplot(122)
+            ax2_1.set_title('Bipartite After Ban', fontdict={'fontsize': title_fontsize})
+            print(f'Network after ban is bipartite: {nx.is_bipartite(network_list[1])}')
+            obj_list[1].plot_network(network_list[1], network_type='bipartite')
+
+            fig.savefig('./figure/bipartite_full_network_comparison.jpg')
+            plt.show()
+
+    def gen_subset_network(self, id_node, network: nx.graph.Graph, network_type):
+        df = self.data
+        # select top 5k transactions for pre ban
+        df = df.sort_values(by=['value'], ascending=False).head(5000)
+
+        id_node_dict = dict(zip(id_node['node'], id_node['id']))
+        
+        if network_type == 'monopartite':
+            # get top 5 nodes based on degree
+            mono_deg = pd.DataFrame(network.degree(),columns=['node','degree']).sort_values(by='degree',ascending=False).head(5).reset_index(drop=True)
+            mono_top = mono_deg['node']
+            mono_top_dict = {key: value for key, value in id_node_dict.items() if key in list(mono_top)}
+
+            # create subset df
+            mono_df = df[(df.from_address_type == 'EOA') &
+                                        (df.to_address_type == 'EOA')].reset_index(drop=True)
+            mono_subset_df = mono_df[mono_df['from_address'].isin(mono_top) | 
+                                                    mono_df['to_address'].isin(mono_top)].reset_index(drop=True)
+
+            # generate network
+            mono_subset = nx.DiGraph()
+            mono_subset.add_nodes_from(np.unique(np.array(mono_subset_df['from_address'].append(mono_subset_df['to_address']))))
+            mono_subset.add_weighted_edges_from(list(zip(mono_subset_df['from_address'],mono_subset_df['to_address'],mono_subset_df['value'])))
+
+            final_network = mono_subset
+
+        elif network_type == 'bipartite':
+            # get top 5 nodes based on degree
+            bi_deg = pd.DataFrame(network.degree(),columns=['node','degree']).sort_values(by='degree',ascending=False).head(5).reset_index(drop=True)
+            bi_top = bi_deg['node']
+            bi_top_dict = {key: value for key, value in id_node_dict.items() if key in list(bi_top)}
+
+            # create subset df
+            bi_df = df[((df.from_address_type == 'EOA') & (df.to_address_type == 'Contract')) | ((df.from_address_type == 'Contract') & (df.to_address_type == 'EOA'))].reset_index(drop=True)
+            bi_subset_df = bi_df[bi_df['from_address'].isin(bi_top) | 
+                                                    bi_df['to_address'].isin(bi_top)].reset_index(drop=True)
+
+            # generate network
+            bi_subset_users = np.unique(np.array(bi_subset_df['from_address']))
+            bi_subset_contracts = np.unique(np.array(bi_subset_df['to_address']))
+            bi_subset_edges = list(zip(bi_subset_df['from_address'], bi_subset_df['to_address'], bi_subset_df['value']))
+
+            bi_subset = nx.DiGraph()
+            bi_subset.add_nodes_from(bi_subset_users, bipartite=0)
+            bi_subset.add_nodes_from(bi_subset_contracts, bipartite=1)
+            bi_subset.add_weighted_edges_from(bi_subset_edges)
+
+            final_network = bi_subset
+
+        return final_network            
+
+    def plot_subset_network_comparison(id_node,network1,network2,network_type):
+        seed = 15; user_color = 'blue'; contract_color = 'red'
+        node_size = 500; contract_node_shape = 's'; alpha = 0.25
+        arrowsize=30; edge_width=1.5
+
+        id_node_dict = dict(zip(id_node['node'], id_node['id']))
+
+        if network_type == 'monopartite':
+            fig = plt.figure(figsize=(50,25), constrained_layout=True)
+            ax1 = fig.add_subplot(121)
+            ax1.set_axis_off()
+            ax1_1 = fig.add_subplot(121)
+            ax1_1.set_title('Monopartite Subset Before Ban', fontdict={'fontsize': 75})
+            network = network1
+
+            # get top 5 nodes based on degree
+            mono_deg = pd.DataFrame(network.degree(),columns=['node','degree']).sort_values(by='degree',ascending=False).head(5).reset_index(drop=True)
+            mono_top = mono_deg['node']
+            mono_top_dict = {key: value for key, value in id_node_dict.items() if key in list(mono_top)}
+
+            pre_ban_mono_subset_pos=nx.spring_layout(network, seed = seed)
+            nx.draw_networkx_nodes(network, pos=pre_ban_mono_subset_pos, nodelist=list(network.nodes()),node_color=user_color, 
+                                node_size=node_size, alpha=alpha)
+            nx.draw_networkx_edges(network, pos=pre_ban_mono_subset_pos, width=edge_width, alpha=alpha, arrows=True, arrowsize=arrowsize)
+            nx.draw_networkx_labels(network, pos=pre_ban_mono_subset_pos, labels=mono_top_dict, 
+                                    font_color='red', font_size=50, verticalalignment='top',clip_on=False)
+
+            ax2 = fig.add_subplot(122)
+            ax2.set_axis_off()
+            ax2_1 = fig.add_subplot(122)
+            ax2_1.set_title('Monopartite Subset After Ban', fontdict={'fontsize': 75})
+            network = network2
+
+            # get top 5 nodes based on degree
+            mono_deg = pd.DataFrame(network.degree(),columns=['node','degree']).sort_values(by='degree',ascending=False).head(5).reset_index(drop=True)
+            mono_top = mono_deg['node']
+            mono_top_dict = {key: value for key, value in id_node_dict.items() if key in list(mono_top)}
+
+            post_ban_mono_subset_pos=nx.spring_layout(network, seed = seed)
+            nx.draw_networkx_nodes(network, pos=post_ban_mono_subset_pos, nodelist=list(network.nodes()),node_color=user_color, 
+                                node_size=node_size, alpha=alpha)
+            nx.draw_networkx_edges(network, pos=post_ban_mono_subset_pos, width=edge_width, alpha=alpha, arrows=True, arrowsize=arrowsize)
+            nx.draw_networkx_labels(network, pos=post_ban_mono_subset_pos, labels=mono_top_dict, 
+                                    font_color='red', font_size=50, verticalalignment='top',clip_on=True)
+
+            fig.savefig('./figure/monopartite_subset_network_comparison.jpg')
+            plt.show()
+        
+        elif network_type == 'bipartite':
+            fig = plt.figure(figsize=(50,25), constrained_layout=True)
+            ax1 = fig.add_subplot(121)
+            ax1.set_axis_off()
+            ax1_1 = fig.add_subplot(121)
+            ax1_1.set_title('Bipartite Subset Before Ban', fontdict={'fontsize': 75})
+            network = network1
+
+            bi_deg = pd.DataFrame(network.degree(),columns=['node','degree']).sort_values(by='degree',ascending=False).head(5).reset_index(drop=True)
+            bi_top = bi_deg['node']
+            bi_top_dict = {key: value for key, value in id_node_dict.items() if key in list(bi_top)}        
+
+            users=[]; contracts=[]
+            for node in network.nodes(data=True):
+                address = node[0]
+                attribute = node[1]['bipartite']
+                if attribute == 0:
+                    users.append(address)
+                elif attribute == 1:
+                    contracts.append(address)
+
+            pre_ban_bi_subset_pos=nx.spring_layout(network, seed = seed)
+            nx.draw_networkx_nodes(network, pos=pre_ban_bi_subset_pos, nodelist=list(users),node_color=user_color, 
+                                    node_size=node_size, alpha=alpha)
+            nx.draw_networkx_nodes(network, pos=pre_ban_bi_subset_pos, nodelist=list(contracts),node_color=contract_color,
+                                    node_size=node_size)
+            nx.draw_networkx_edges(network, pos=pre_ban_bi_subset_pos, width=edge_width, alpha=alpha, arrows=True, arrowsize=arrowsize)
+            nx.draw_networkx_labels(network, pos=pre_ban_bi_subset_pos, labels=bi_top_dict, 
+                                    font_color='red', font_size=50, verticalalignment='bottom',clip_on=True)
+
+            ax2 = fig.add_subplot(122)
+            ax2.set_axis_off()
+            ax2_1 = fig.add_subplot(122)
+            ax2_1.set_title('Bipartite Subset After Ban', fontdict={'fontsize': 75})
+            network = network2
+
+            bi_deg = pd.DataFrame(network.degree(),columns=['node','degree']).sort_values(by='degree',ascending=False).head(5).reset_index(drop=True)
+            bi_top = bi_deg['node']
+            bi_top_dict = {key: value for key, value in id_node_dict.items() if key in list(bi_top)}          
+
+            users=[]; contracts=[]
+            for node in network.nodes(data=True):
+                address = node[0]
+                attribute = node[1]['bipartite']
+                if attribute == 0:
+                    users.append(address)
+                elif attribute == 1:
+                    contracts.append(address)
+
+            post_ban_bi_subset_pos=nx.spring_layout(network, seed = seed)
+            nx.draw_networkx_nodes(network, pos=post_ban_bi_subset_pos, nodelist=list(users),node_color=user_color, 
+                                    node_size=node_size, alpha=alpha)
+            nx.draw_networkx_nodes(network, pos=post_ban_bi_subset_pos, nodelist=list(contracts),node_color=contract_color,
+                                    node_size=node_size)
+            nx.draw_networkx_edges(network, pos=post_ban_bi_subset_pos, width=edge_width, alpha=alpha, arrows=True, arrowsize=arrowsize)
+            nx.draw_networkx_labels(network, pos=post_ban_bi_subset_pos, labels=bi_top_dict, 
+                                    font_color='red', font_size=50, verticalalignment='bottom',clip_on=True)
+
+            fig.savefig('./figure/bipartite_subset_network_comparison.jpg')
+            plt.show()
 
     def cal_degree(network: nx.graph.Graph):
         dv = dict(network.degree())
@@ -114,18 +282,7 @@ class NetworkAnalysis:
 
     def degree_stats(pre_ban_mono_k, post_ban_mono_k, pre_ban_bi_k, post_ban_bi_k):
         print("Overall Degree Summary Statistics:")
-        # pre_ban_mono_dv = dict(network1.degree())
-        # pre_ban_mono_k = list(pre_ban_mono_dv.values())
-
-        # post_ban_mono_dv = dict(network2.degree())
-        # post_ban_mono_k = list(post_ban_mono_dv.values())
-
-        # pre_ban_bi_dv = dict(network3.degree())
-        # pre_ban_bi_k = list(pre_ban_bi_dv.values())
-
-        # post_ban_bi_dv = dict(network4.degree())
-        # post_ban_bi_k = list(post_ban_bi_dv.values())                      
-
+                    
         degree_table = PrettyTable(["Stats", "Monopartite Pre-Ban", "Monopartite Post-Ban", 
                                     "Bipartite Pre-Ban", "Bipartite Post-Ban"])
 
@@ -249,6 +406,7 @@ class NetworkAnalysis:
         ax6.set_ylabel("Count")
         ax6.set_xlabel("Degree")
         ax6.set_xlim(0,150)
+        ax6.set_ylim(0,1200)      
         plt.show()
         fig.savefig(f"./figure/{suptitle_label.replace(' ','_')}.jpg")
 
@@ -443,16 +601,3 @@ class NetworkAnalysis:
         
         plt.show()
         fig.savefig('./figure/modularity_scores.png')
-
-
-if __name__ == '__main__':
-    pre_ban_df = pd.read_csv('data/cleaned_data_before_ban.csv').loc[:100]
-    post_ban_df = pd.read_csv('data/cleaned_data_after_ban.csv').loc[:100]
-    pre_ban_obj = NetworkAnalysis(pre_ban_df)
-    pre_ban_mono = pre_ban_obj.gen_network(network_type='monopartite')
-    pre_ban_bi = pre_ban_obj.gen_network(network_type='bipartite')
-
-    post_ban_obj = NetworkAnalysis(post_ban_df)
-    post_ban_mono = post_ban_obj.gen_network(network_type='monopartite')
-    post_ban_bi = post_ban_obj.gen_network(network_type='bipartite')
-    pre_ban_obj.plot_degree_dist(pre_ban_mono,post_ban_mono,"Monopartite Degree Distribution")
