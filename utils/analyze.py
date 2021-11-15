@@ -105,6 +105,7 @@ class NetworkAnalysis:
         print(f'Network after ban is bipartite: {nx.is_bipartite(network_list[3])}')
         obj_list[1].plot_network(network_list[3], network_type='bipartite')
         plt.show()
+        fig.savefig('./figure/network_comparison.jpg')
 
     def cal_degree(network: nx.graph.Graph):
         dv = dict(network.degree())
@@ -138,7 +139,6 @@ class NetworkAnalysis:
                             round(np.std(pre_ban_bi_k),2), round(np.std(post_ban_bi_k),2)])
         print(degree_table)
 
-##### FIX AXES RANGES #####
     def plot_degree_dist(network1: nx.graph.Graph, network2: nx.graph.Graph, suptitle_label, figsize=(12,8)):
         alpha = 0.5
         fig = plt.figure(figsize=figsize,constrained_layout=True)
@@ -250,6 +250,7 @@ class NetworkAnalysis:
         ax6.set_xlabel("Degree")
         ax6.set_xlim(0,150)
         plt.show()
+        fig.savefig(f"./figure/{suptitle_label.replace(' ','_')}.jpg")
 
     def plot_power_law(network1: nx.graph.Graph,network2: nx.graph.Graph,network3: nx.graph.Graph,network4: nx.graph.Graph,figsize=(12, 8)):
         fig = plt.figure(figsize=(12, 8), constrained_layout=True)
@@ -319,6 +320,7 @@ class NetworkAnalysis:
         ax4.set_yscale('log')
         ax4.set_xscale('log')
         plt.show()
+        fig.savefig("./figure/plot_power_law.png")
 
     def cal_betweenness_cen(network: nx.graph.Graph):
         # Calculating the Betweenness Centrality for a network
@@ -440,6 +442,7 @@ class NetworkAnalysis:
         ax4.set_title('Modularity score for Bipartite after ban')
         
         plt.show()
+        fig.savefig('./figure/modularity_scores.png')
 
 
 if __name__ == '__main__':

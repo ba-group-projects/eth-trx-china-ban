@@ -24,6 +24,12 @@ The structure of the code is as follows:
   - analyze.py(main analysis methods are encapsulated in this file)
   - identify_contract.py(function to identify contract address)
   - preprocess.py(function to preprocess data, since we already have the processed data in the data file, we do not need to apply functions in this file in our main code.)
+- figure(We save all of our figure in this file)
+  - modularity_scores.png
+  - network_comparison.jpg
+  - Monopartite_Degree_Distribution.jpg
+  - Bipartite_Degree_Distribution.jpg
+  - plot_power_law.png
 - smm638.ipynb # main code
 - requirements.txt
 - README.md
