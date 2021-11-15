@@ -15,8 +15,6 @@ The structure of the code is as follows:
   - cleaned_data_before_ban.csv
   - id_node.csv
   - modularity_score.csv
-- dataCleaned
-  - cleaned_data.csv
 - docs
   - quick_start.md(doc for cooperation)
 - utils
