@@ -1,9 +1,6 @@
 import os
 import pandas as pd
-import numpy as np
-import networkx as nx
-from analyze import NetworkAnalysis
-from networkx.algorithms import bipartite as bp
+from utils.analyze import NetworkAnalysis
 import matplotlib.pyplot as plt
  
 path = os.getcwd()
