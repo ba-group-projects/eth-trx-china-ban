@@ -31,7 +31,6 @@ The structure of the code is as follows:
   - modularity_scores.png
   - monopartite_full_network_comparison.jpg
   - monopartite_subset_network_comparison.jpg
-  - plot_degree_dist.jpg
   - plot_power_law.png
 - smm638.ipynb # main code
 - requirements.txt
