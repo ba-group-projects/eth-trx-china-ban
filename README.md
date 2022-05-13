@@ -1,12 +1,25 @@
-# SMM638 Network Analytics MTP
-## How to start
+![banner image](https://phantom-marca.unidadeditorial.es/67bded5af5a033e63335aba9c6705bec/resize/660/f/webp/assets/multimedia/imagenes/2022/03/20/16477692211339.jpg)
+
+# Impact of China cryptocurrency ban on Ethereum ecosystem
+
+## Table of Contents
+* [Installation](#Installation)
+* [Project Motivation](#motivation)
+* [File Description](#description)
+* [Results](#Results)
+* [Known Issue](#issue)
+
+## Installation
 1. install packages
 ```bash
 pip install -r requirements.txt # install packages
 ```
 2. run the code in the smm638.ipynb
 
-## The structure of the code
+## Project Motivation <a name="motivation"></a>
+TODO
+
+## File Description <a name="description"></a>
 The structure of the code is as follows:
 - data
   - address_type.json
@@ -36,3 +49,6 @@ The structure of the code is as follows:
 - requirements.txt
 - README.md
 - config.json(the config file we used to get the data)
+
+## Results
+TODO
